@@ -7,11 +7,29 @@ Mock mode: set MOCK_TOOLS=true in .env
 
 import os
 import asyncio
+import json
 from datetime import datetime
 
 MOCK = os.getenv("MOCK_TOOLS", "true").lower() == "true"
 DRIVE_CREDENTIALS_JSON = os.getenv("GOOGLE_CREDENTIALS_JSON", "credentials.json")
+DRIVE_CREDENTIALS_CONTENT = os.getenv("GOOGLE_CREDENTIALS_JSON_CONTENT", "")  # Render env var
 PARENT_FOLDER_ID = os.getenv("DRIVE_PARENT_FOLDER_ID", "")
+
+
+def _get_google_credentials():
+    """Load credentials from JSON string (cloud) or fallback to file (local)."""
+    from google.oauth2 import service_account
+    SCOPES = ["https://www.googleapis.com/auth/drive"]
+
+    if DRIVE_CREDENTIALS_CONTENT:
+        # ✅ Render / Cloud: credentials stored as raw JSON string in env var
+        info = json.loads(DRIVE_CREDENTIALS_CONTENT)
+        return service_account.Credentials.from_service_account_info(info, scopes=SCOPES)
+    else:
+        # 💻 Local: read from credentials.json file
+        return service_account.Credentials.from_service_account_file(
+            DRIVE_CREDENTIALS_JSON, scopes=SCOPES
+        )
 
 SUBFOLDERS = ["01_Contracts", "02_Deliverables", "03_Assets", "04_Invoices", "05_Reports"]
 
@@ -51,13 +69,7 @@ async def create_drive_folder(payload: dict) -> dict:
     max_retries = 2
     for attempt in range(max_retries + 1):
         try:
-            from googleapiclient.discovery import build
-            from google.oauth2 import service_account
-
-            creds = service_account.Credentials.from_service_account_file(
-                DRIVE_CREDENTIALS_JSON,
-                scopes=["https://www.googleapis.com/auth/drive"],
-            )
+            creds = _get_google_credentials()
             service = build("drive", "v3", credentials=creds)
 
             # Create main client folder
