@@ -9,6 +9,7 @@ import os
 import asyncio
 import json
 from datetime import datetime
+from googleapiclient.discovery import build # Fixed: added missing import
 
 MOCK = os.getenv("MOCK_TOOLS", "true").lower() == "true"
 DRIVE_CREDENTIALS_JSON = os.getenv("GOOGLE_CREDENTIALS_JSON", "credentials.json")

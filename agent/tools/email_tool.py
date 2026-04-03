@@ -23,6 +23,13 @@ from datetime import datetime
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import PromptTemplate
 
+# New: Top-level SendGrid imports for better error handling visibility
+try:
+    from sendgrid import SendGridAPIClient
+    from sendgrid.helpers.mail import Mail
+except ImportError:
+    pass
+
 MOCK           = os.getenv("MOCK_TOOLS", "true").lower() == "true"
 USE_GMAIL      = os.getenv("USE_GMAIL", "false").lower() == "true"
 SENDGRID_KEY   = os.getenv("SENDGRID_API_KEY", "")
@@ -164,8 +171,6 @@ async def _send(to_email: str, subject: str, html_body: str) -> dict:
     else:
         # ── SendGrid ──────────────────────────────────────────────────────────
         try:
-            from sendgrid import SendGridAPIClient
-            from sendgrid.helpers.mail import Mail
             message = Mail(
                 from_email=FROM_EMAIL,
                 to_emails=to_email,
@@ -182,7 +187,12 @@ async def _send(to_email: str, subject: str, html_body: str) -> dict:
                 "sent_at": datetime.utcnow().isoformat(),
             }
         except Exception as e:
-            return {"success": False, "provider": "sendgrid", "error": str(e)}
+            # Enhanced error logging for SendGrid
+            err_msg = str(e)
+            if hasattr(e, 'body'):
+                err_msg = f"{e.status_code}: {e.body.decode('utf-8')}"
+            print(f"[ERROR] SendGrid failed: {err_msg}")
+            return {"success": False, "provider": "sendgrid", "error": err_msg}
 
 
 # ── Public API ─────────────────────────────────────────────────────────────────
