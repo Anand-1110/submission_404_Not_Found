@@ -188,7 +188,7 @@ async function runPipeline(data) {
     setStepDone('validate', false);
     document.getElementById('errorBranch').classList.add('active');
     errors.forEach(e => addLog(`✗ ${e}`, 'error'));
-    addLog('Validation FAILED — alerting account manager', 'error');
+    addLog('Validation FAILED — alerting account manager', 'warning');
     errorsCount++;
     updateMetrics();
     setSystemStatus('error');
@@ -365,9 +365,19 @@ async function runPipelineReal(data) {
     setStepActive(sid);
     addLog(toolLogs[i][0]);
     await sleep(400);
-    const success = results[sid]?.success !== false;
+
+    const stepResult = results[sid] || {};
+    const success = stepResult.success !== false;
+    
     setStepDone(sid, success);
-    addLog(toolLogs[i][1], success ? 'success' : 'error');
+    
+    if (success) {
+      addLog(toolLogs[i][1], 'success');
+    } else {
+      const errorMsg = stepResult.error || `Failed to execute ${sid}`;
+      addLog(`❌ ${errorMsg}`, 'error');
+    }
+    
     if (i < toolSteps.length - 1) activateConnector(i + 3);
   }
 
