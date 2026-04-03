@@ -32,11 +32,13 @@ except ImportError:
 
 MOCK           = os.getenv("MOCK_TOOLS", "true").lower() == "true"
 USE_GMAIL      = os.getenv("USE_GMAIL", "false").lower() == "true"
+USE_RESEND     = os.getenv("USE_RESEND", "false").lower() == "true"
 SENDGRID_KEY   = os.getenv("SENDGRID_API_KEY", "").strip()
+RESEND_API_KEY = os.getenv("RESEND_API_KEY", "").strip()
 FROM_EMAIL     = os.getenv("FROM_EMAIL", "").strip()
 MANAGER_EMAIL  = os.getenv("MANAGER_EMAIL", "").strip()
-GMAIL_ADDRESS  = os.getenv("GMAIL_ADDRESS", "")
-GMAIL_APP_PASS = os.getenv("GMAIL_APP_PASSWORD", "")
+GMAIL_ADDRESS  = os.getenv("GMAIL_ADDRESS", "").strip()
+GMAIL_APP_PASS = os.getenv("GMAIL_APP_PASSWORD", "").strip()
 
 
 # ── HTML Templates ─────────────────────────────────────────────────────────────
@@ -150,9 +152,38 @@ def _alert_html(p: dict, errors: list, run_id: str) -> str:
 
 
 # ── Sender dispatch ────────────────────────────────────────────────────────────
+import httpx
 
 async def _send(to_email: str, subject: str, html_body: str) -> dict:
-    """Route to SendGrid or Gmail based on .env config."""
+    """Route to SendGrid, Resend, or Gmail based on .env config."""
+
+    if USE_RESEND:
+        # ── Resend API (HTTP) ─────────────────────────────────────────────────
+        try:
+            url = "https://api.resend.com/emails"
+            headers = {
+                "Authorization": f"Bearer {RESEND_API_KEY}",
+                "Content-Type": "application/json"
+            }
+            # Use Resend's default verified domain if FROM_EMAIL is a gmail address to avoid DMARC
+            sender = "onboarding@resend.dev" if "gmail.com" in FROM_EMAIL else FROM_EMAIL
+            
+            payload = {
+                "from": f"Scrollhouse <{sender}>",
+                "to": [to_email],
+                "subject": subject,
+                "html": html_body
+            }
+            async with httpx.AsyncClient() as client:
+                resp = await client.post(url, headers=headers, json=payload)
+                if resp.status_code in (200, 201):
+                    return {"success": True, "provider": "resend", "to": to_email, "sent_at": datetime.utcnow().isoformat()}
+                else:
+                    err = resp.text
+                    print(f"[ERROR] Resend failed: {resp.status_code} - {err}")
+                    return {"success": False, "provider": "resend", "error": err}
+        except Exception as e:
+            return {"success": False, "provider": "resend", "error": str(e)}
 
     if USE_GMAIL:
         # ── Gmail SMTP ────────────────────────────────────────────────────────
