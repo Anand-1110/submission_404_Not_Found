@@ -193,7 +193,12 @@ async def _send(to_email: str, subject: str, html_body: str) -> dict:
             # Enhanced error logging for SendGrid
             err_msg = str(e)
             if hasattr(e, 'body'):
+                # SendGrid often returns a 403/401 if the sender isn't verified
                 err_msg = f"{e.status_code}: {e.body.decode('utf-8')}"
+                if e.status_code == 403:
+                    err_msg += " (HINT: Have you verified your 'Single Sender' in SendGrid Settings?)"
+                if e.status_code == 401:
+                    err_msg += " (HINT: Your SENDGRID_API_KEY is invalid or missing.)"
             print(f"[ERROR] SendGrid failed: {err_msg}")
             return {"success": False, "provider": "sendgrid", "error": err_msg}
 
