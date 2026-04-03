@@ -32,9 +32,9 @@ except ImportError:
 
 MOCK           = os.getenv("MOCK_TOOLS", "true").lower() == "true"
 USE_GMAIL      = os.getenv("USE_GMAIL", "false").lower() == "true"
-SENDGRID_KEY   = os.getenv("SENDGRID_API_KEY", "")
-FROM_EMAIL     = os.getenv("FROM_EMAIL", "")
-MANAGER_EMAIL  = os.getenv("MANAGER_EMAIL", "")
+SENDGRID_KEY   = os.getenv("SENDGRID_API_KEY", "").strip()
+FROM_EMAIL     = os.getenv("FROM_EMAIL", "").strip()
+MANAGER_EMAIL  = os.getenv("MANAGER_EMAIL", "").strip()
 GMAIL_ADDRESS  = os.getenv("GMAIL_ADDRESS", "")
 GMAIL_APP_PASS = os.getenv("GMAIL_APP_PASSWORD", "")
 

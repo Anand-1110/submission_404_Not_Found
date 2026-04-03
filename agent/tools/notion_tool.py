@@ -15,8 +15,8 @@ import asyncio
 from datetime import datetime
 
 MOCK = os.getenv("MOCK_TOOLS", "true").lower() == "true"
-NOTION_API_KEY = os.getenv("NOTION_API_KEY", "")
-NOTION_PARENT_PAGE_ID = os.getenv("NOTION_PARENT_PAGE_ID", "")
+NOTION_API_KEY = os.getenv("NOTION_API_KEY", "").strip()
+NOTION_PARENT_PAGE_ID = os.getenv("NOTION_PARENT_PAGE_ID", "").strip()
 
 
 def _build_notion_page(payload: dict) -> dict:

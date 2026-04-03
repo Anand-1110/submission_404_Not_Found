@@ -15,9 +15,9 @@ import asyncio
 from datetime import datetime
 
 MOCK = os.getenv("MOCK_TOOLS", "true").lower() == "true"
-AIRTABLE_API_KEY = os.getenv("AIRTABLE_API_KEY", "")
-AIRTABLE_BASE_ID = os.getenv("AIRTABLE_BASE_ID", "")
-AIRTABLE_TABLE_NAME = os.getenv("AIRTABLE_TABLE_NAME", "Clients")
+AIRTABLE_API_KEY = os.getenv("AIRTABLE_API_KEY", "").strip()
+AIRTABLE_BASE_ID = os.getenv("AIRTABLE_BASE_ID", "").strip()
+AIRTABLE_TABLE_NAME = os.getenv("AIRTABLE_TABLE_NAME", "Clients").strip()
 
 
 async def create_airtable_record(payload: dict, upstream_results: dict) -> dict:
