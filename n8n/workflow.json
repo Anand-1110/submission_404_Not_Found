@@ -1,0 +1,115 @@
+{
+  "name": "Scrollhouse Client Onboarding Workflow",
+  "nodes": [
+    {
+      "id": "webhook-trigger",
+      "name": "Webhook — New Client",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "parameters": {
+        "path": "onboard",
+        "httpMethod": "POST",
+        "responseMode": "lastNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "set-data",
+      "name": "Normalise Payload",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [460, 300],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {"id": "1", "name": "client_name", "value": "={{ $json.client_name.trim() }}", "type": "string"},
+            {"id": "2", "name": "client_email", "value": "={{ $json.client_email.toLowerCase().trim() }}", "type": "string"},
+            {"id": "3", "name": "service_plan", "value": "={{ $json.service_plan.toLowerCase() }}", "type": "string"},
+            {"id": "4", "name": "start_date", "value": "={{ $json.start_date }}", "type": "string"},
+            {"id": "5", "name": "account_manager", "value": "={{ $json.account_manager || 'Unassigned' }}", "type": "string"},
+            {"id": "6", "name": "notes", "value": "={{ $json.notes || '' }}", "type": "string"}
+          ]
+        }
+      }
+    },
+    {
+      "id": "call-python-agent",
+      "name": "Call Python Agent (LangGraph + LangChain)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [680, 300],
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:8000/webhook/onboard",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "response": {"response": {"fullResponse": false}},
+          "timeout": 60000
+        }
+      }
+    },
+    {
+      "id": "if-success",
+      "name": "Success?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [900, 300],
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.status }}",
+              "operation": "equals",
+              "value2": "success"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "respond-success",
+      "name": "Respond — Success",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1120, 200],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ status: 'ok', message: 'Client onboarded', run_id: $json.run_id }) }}"
+      }
+    },
+    {
+      "id": "respond-error",
+      "name": "Respond — Error / Alert Manager",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1120, 400],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ status: 'error', errors: $json.errors }) }}",
+        "options": {"responseCode": 422}
+      }
+    }
+  ],
+  "connections": {
+    "Webhook — New Client": {"main": [[{"node": "Normalise Payload", "type": "main", "index": 0}]]},
+    "Normalise Payload": {"main": [[{"node": "Call Python Agent (LangGraph + LangChain)", "type": "main", "index": 0}]]},
+    "Call Python Agent (LangGraph + LangChain)": {"main": [[{"node": "Success?", "type": "main", "index": 0}]]},
+    "Success?": {
+      "main": [
+        [{"node": "Respond — Success", "type": "main", "index": 0}],
+        [{"node": "Respond — Error / Alert Manager", "type": "main", "index": 0}]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "meta": {
+    "instanceId": "scrollhouse-agent"
+  }
+}

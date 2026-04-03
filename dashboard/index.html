@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scrollhouse — Client Onboarding Agent</title>
+  <meta name="description" content="Automated client onboarding agent dashboard for Scrollhouse. Track email sends, Drive folder creation, Notion pages, and Airtable records in real-time." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Background particles -->
+  <div class="bg-orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="nav-brand">
+      <div class="brand-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      </div>
+      <span class="brand-name">Scrollhouse</span>
+      <span class="brand-badge">ONBOARDING AGENT</span>
+    </div>
+    <div class="nav-status">
+      <span class="status-dot" id="systemStatus"></span>
+      <span class="status-label" id="systemStatusLabel">System Ready</span>
+    </div>
+    <div class="nav-actions">
+      <button class="btn-ghost" id="btnOpenLogs">View Logs</button>
+      <button class="btn-primary" id="btnTriggerDemo">▶ Run Demo</button>
+    </div>
+  </nav>
+
+  <main class="main-content">
+
+    <!-- Header Banner -->
+    <section class="hero-section">
+      <div class="hero-text">
+        <h1>Client Onboarding <span class="gradient-text">Automation</span></h1>
+        <p class="hero-sub">Full-stack AI agent that handles email, Drive, Notion, and Airtable — automatically. From new signup to fully onboarded in under 60 seconds.</p>
+      </div>
+      <div class="hero-metrics">
+        <div class="metric-card">
+          <span class="metric-val" id="metricTime">0s</span>
+          <span class="metric-label">Last Run Time</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-val" id="metricTotal">0</span>
+          <span class="metric-label">Clients Onboarded</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-val" id="metricErrors">0</span>
+          <span class="metric-label">Errors Caught</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- New Client Form -->
+    <section class="form-section glass-card">
+      <div class="section-header">
+        <div class="section-icon purple">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+        </div>
+        <h2>New Client Intake</h2>
+        <span class="badge">WEBHOOK TRIGGER</span>
+      </div>
+      <form class="client-form" id="clientForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="clientName">Client Name *</label>
+            <input type="text" id="clientName" placeholder="e.g. Acme Corp" required />
+          </div>
+          <div class="form-group">
+            <label for="clientEmail">Email Address *</label>
+            <input type="email" id="clientEmail" placeholder="ceo@acmecorp.com" required />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="clientPlan">Service Plan *</label>
+            <select id="clientPlan" required>
+              <option value="">Select plan...</option>
+              <option value="starter">Starter — $499/mo</option>
+              <option value="growth">Growth — $1,299/mo</option>
+              <option value="enterprise">Enterprise — Custom</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="startDate">Start Date *</label>
+            <input type="date" id="startDate" required />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="accountManager">Account Manager</label>
+            <input type="text" id="accountManager" placeholder="e.g. Sarah J." />
+          </div>
+          <div class="form-group">
+            <label for="notes">Notes</label>
+            <input type="text" id="notes" placeholder="Any special requirements..." />
+          </div>
+        </div>
+        <button type="submit" class="btn-submit" id="submitBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          Trigger Onboarding Agent
+        </button>
+      </form>
+    </section>
+
+    <!-- Pipeline Flow Visualization -->
+    <section class="pipeline-section">
+      <div class="section-title-row">
+        <h2 class="section-title">Live Agent Pipeline</h2>
+        <span class="pipeline-note">Steps execute sequentially — watch them light up</span>
+      </div>
+
+      <div class="pipeline-wrapper">
+        <!-- Step 1: Webhook -->
+        <div class="pipe-step" id="step-webhook" data-step="webhook">
+          <div class="pipe-icon-wrap purple">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          </div>
+          <div class="pipe-info">
+            <span class="pipe-label">Webhook Trigger</span>
+            <span class="pipe-sub">n8n receives POST request</span>
+          </div>
+          <div class="pipe-status-badge" id="badge-webhook">WAITING</div>
+        </div>
+
+        <div class="pipe-connector" id="conn-1"></div>
+
+        <!-- Step 2: Validator -->
+        <div class="pipe-step" id="step-validate" data-step="validate">
+          <div class="pipe-icon-wrap teal">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
+          </div>
+          <div class="pipe-info">
+            <span class="pipe-label">LangGraph Validator</span>
+            <span class="pipe-sub">Checks email, duplicates, dates</span>
+          </div>
+          <div class="pipe-status-badge" id="badge-validate">WAITING</div>
+        </div>
+
+        <!-- Error branch -->
+        <div class="error-branch" id="errorBranch">
+          <div class="error-branch-line"></div>
+          <div class="error-branch-box">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            Alert Manager
+          </div>
+        </div>
+
+        <div class="pipe-connector" id="conn-2"></div>
+
+        <!-- Step 3: Email -->
+        <div class="pipe-step" id="step-email" data-step="email">
+          <div class="pipe-icon-wrap orange">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          </div>
+          <div class="pipe-info">
+            <span class="pipe-label">Send Welcome Email</span>
+            <span class="pipe-sub">AI-written via SendGrid</span>
+          </div>
+          <div class="pipe-status-badge" id="badge-email">WAITING</div>
+        </div>
+
+        <div class="pipe-connector" id="conn-3"></div>
+
+        <!-- Step 4: Drive -->
+        <div class="pipe-step" id="step-drive" data-step="drive">
+          <div class="pipe-icon-wrap blue">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <div class="pipe-info">
+            <span class="pipe-label">Create Drive Folder</span>
+            <span class="pipe-sub">Folder + subfolders + share</span>
+          </div>
+          <div class="pipe-status-badge" id="badge-drive">WAITING</div>
+        </div>
+
+        <div class="pipe-connector" id="conn-4"></div>
+
+        <!-- Step 5: Notion -->
+        <div class="pipe-step" id="step-notion" data-step="notion">
+          <div class="pipe-icon-wrap violet">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+          </div>
+          <div class="pipe-info">
+            <span class="pipe-label">Create Notion Page</span>
+            <span class="pipe-sub">From master template</span>
+          </div>
+          <div class="pipe-status-badge" id="badge-notion">WAITING</div>
+        </div>
+
+        <div class="pipe-connector" id="conn-5"></div>
+
+        <!-- Step 6: Airtable -->
+        <div class="pipe-step" id="step-airtable" data-step="airtable">
+          <div class="pipe-icon-wrap green">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          </div>
+          <div class="pipe-info">
+            <span class="pipe-label">Airtable Record</span>
+            <span class="pipe-sub">Create CRM entry + links</span>
+          </div>
+          <div class="pipe-status-badge" id="badge-airtable">WAITING</div>
+        </div>
+
+        <div class="pipe-connector" id="conn-6"></div>
+
+        <!-- Step 7: Summary -->
+        <div class="pipe-step" id="step-summary" data-step="summary">
+          <div class="pipe-icon-wrap gold">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+          </div>
+          <div class="pipe-info">
+            <span class="pipe-label">Completion Summary</span>
+            <span class="pipe-sub">Email manager all links</span>
+          </div>
+          <div class="pipe-status-badge" id="badge-summary">WAITING</div>
+        </div>
+
+        <div class="pipe-connector" id="conn-7"></div>
+
+        <!-- Step 8: Logger -->
+        <div class="pipe-step" id="step-logger" data-step="logger">
+          <div class="pipe-icon-wrap gray">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          </div>
+          <div class="pipe-info">
+            <span class="pipe-label">LangSmith Logger</span>
+            <span class="pipe-sub">Full audit trail saved</span>
+          </div>
+          <div class="pipe-status-badge" id="badge-logger">WAITING</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Bottom Grid: Logs + Result Card -->
+    <div class="bottom-grid">
+
+      <!-- Audit Log Panel -->
+      <div class="glass-card log-panel">
+        <div class="section-header">
+          <div class="section-icon gray">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          </div>
+          <h3>Agent Log</h3>
+          <button class="btn-clear" id="btnClearLogs">Clear</button>
+        </div>
+        <div class="log-output" id="logOutput">
+          <div class="log-line info">[INFO] Scrollhouse Onboarding Agent v1.0 initialized</div>
+          <div class="log-line info">[INFO] Webhook listener ready on /webhook/onboard</div>
+          <div class="log-line info">[INFO] LangGraph validation graph compiled</div>
+          <div class="log-line info">[INFO] LangChain tools registered: email, drive, notion, airtable</div>
+          <div class="log-line info">[INFO] LangSmith tracer connected</div>
+          <div class="log-line success">[READY] Waiting for new client data...</div>
+        </div>
+      </div>
+
+      <!-- Result Card -->
+      <div class="glass-card result-panel" id="resultPanel">
+        <div class="section-header">
+          <div class="section-icon gold">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
+          </div>
+          <h3>Last Run Result</h3>
+        </div>
+        <div class="result-empty" id="resultEmpty">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          <p>Submit a client form to see results here</p>
+        </div>
+        <div class="result-content hidden" id="resultContent">
+          <div class="result-client-name" id="resultClientName"></div>
+          <div class="result-links" id="resultLinks"></div>
+          <div class="result-time" id="resultTime"></div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Full Logs Modal -->
+  <div class="modal-overlay hidden" id="logsModal">
+    <div class="modal glass-card">
+      <div class="modal-header">
+        <h3>📋 Complete Audit Log</h3>
+        <button class="modal-close" id="modalClose">✕</button>
+      </div>
+      <div class="modal-body" id="modalLogContent"></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scrollhouse — Easy Setup Guide</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0d1117; --surface: #161b22; --surface2: #1c2128;
+      --border: #30363d; --purple: #7c3aed; --blue: #3b82f6;
+      --green: #22c55e; --gold: #f59e0b; --red: #ef4444;
+      --orange: #f97316; --teal: #14b8a6;
+      --text: #e6edf3; --muted: #8b949e; --dim: #484f58;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); }
+
+    /* ─── Sidebar Nav ─────────────────────────────────────────────── */
+    .sidebar {
+      position: fixed; top: 0; left: 0; bottom: 0;
+      width: 240px; background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 24px 0; z-index: 100;
+      display: flex; flex-direction: column;
+    }
+    .sidebar-brand {
+      padding: 0 20px 20px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+    .sidebar-brand .logo {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 15px; font-weight: 700;
+    }
+    .logo-icon {
+      width: 30px; height: 30px;
+      background: linear-gradient(135deg, var(--purple), var(--blue));
+      border-radius: 7px; display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+    }
+    .sidebar-brand small { display: block; color: var(--muted); font-size: 11px; margin-top: 4px; }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 20px; font-size: 13px; font-weight: 500;
+      color: var(--muted); cursor: pointer; border: none;
+      background: none; width: 100%; text-align: left;
+      border-left: 2px solid transparent;
+      text-decoration: none; transition: all 0.2s;
+    }
+    .nav-item:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+    .nav-item.active { color: var(--text); border-left-color: var(--purple); background: rgba(124,58,237,0.08); }
+    .nav-item .nav-dot {
+      width: 20px; height: 20px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 700; flex-shrink: 0;
+      border: 1px solid var(--border);
+      background: var(--surface2); color: var(--dim);
+    }
+    .nav-item.active .nav-dot { background: var(--purple); color: white; border-color: var(--purple); }
+    .nav-item.done .nav-dot { background: var(--green); color: white; border-color: var(--green); }
+    .nav-item.done { color: var(--green); }
+    .nav-section { padding: 8px 20px 4px; font-size: 10px; letter-spacing: 1px; color: var(--dim); font-weight: 600; text-transform: uppercase; margin-top: 8px; }
+
+    /* ─── Main Content ────────────────────────────────────────────── */
+    .main { margin-left: 240px; padding: 48px 60px 120px; max-width: 900px; }
+
+    /* ─── Section ─────────────────────────────────────────────────── */
+    .section { margin-bottom: 80px; scroll-margin-top: 40px; }
+
+    .section-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
+      letter-spacing: 0.5px; margin-bottom: 12px;
+    }
+    .badge-email  { background: rgba(249,115,22,0.1);  color: var(--orange); border: 1px solid rgba(249,115,22,0.3); }
+    .badge-drive  { background: rgba(59,130,246,0.1);  color: #60a5fa;       border: 1px solid rgba(59,130,246,0.3); }
+    .badge-notion { background: rgba(124,58,237,0.1);  color: #a78bfa;       border: 1px solid rgba(124,58,237,0.3); }
+    .badge-airtable{ background: rgba(20,184,166,0.1); color: var(--teal);   border: 1px solid rgba(20,184,166,0.3); }
+    .badge-test   { background: rgba(34,197,94,0.1);   color: var(--green);  border: 1px solid rgba(34,197,94,0.3); }
+    .badge-start  { background: rgba(245,158,11,0.1);  color: var(--gold);   border: 1px solid rgba(245,158,11,0.3); }
+
+    .section-title { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 8px; }
+    .section-desc  { color: var(--muted); font-size: 15px; line-height: 1.6; margin-bottom: 28px; max-width: 620px; }
+
+    /* ─── Steps ───────────────────────────────────────────────────── */
+    .steps { display: flex; flex-direction: column; gap: 16px; }
+
+    .step {
+      display: flex; gap: 16px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 20px;
+      transition: border-color 0.2s;
+    }
+    .step:hover { border-color: rgba(124,58,237,0.4); }
+
+    .step-left { display: flex; flex-direction: column; align-items: center; gap: 6px; flex-shrink: 0; }
+    .step-circle {
+      width: 36px; height: 36px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 700; flex-shrink: 0;
+    }
+    .c-orange { background: rgba(249,115,22,0.15); color: var(--orange); border: 1px solid rgba(249,115,22,0.4); }
+    .c-blue   { background: rgba(59,130,246,0.15); color: #60a5fa;       border: 1px solid rgba(59,130,246,0.4); }
+    .c-purple { background: rgba(124,58,237,0.15); color: #a78bfa;       border: 1px solid rgba(124,58,237,0.4); }
+    .c-teal   { background: rgba(20,184,166,0.15); color: var(--teal);   border: 1px solid rgba(20,184,166,0.4); }
+    .c-green  { background: rgba(34,197,94,0.15);  color: var(--green);  border: 1px solid rgba(34,197,94,0.4); }
+    .c-gold   { background: rgba(245,158,11,0.15); color: var(--gold);   border: 1px solid rgba(245,158,11,0.4); }
+
+    .step-line { width: 2px; flex: 1; background: var(--border); border-radius: 1px; min-height: 12px; }
+
+    .step-body { flex: 1; }
+    .step-heading { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+    .step-text { color: var(--muted); font-size: 14px; line-height: 1.65; }
+    .step-text strong { color: var(--text); }
+    .step-text a { color: var(--blue); text-decoration: none; }
+    .step-text a:hover { text-decoration: underline; }
+
+    /* ─── Image placeholder / screenshot area ─────────────────────── */
+    .screenshot {
+      margin-top: 12px; border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      padding: 14px 16px;
+      font-size: 12px; color: var(--dim);
+      font-family: 'JetBrains Mono', monospace;
+      line-height: 1.5;
+    }
+    .screenshot .path { color: #60a5fa; margin-bottom: 6px; display: block; font-size: 11px; }
+
+    /* ─── Code / Command box ──────────────────────────────────────── */
+    .cmd {
+      margin-top: 12px; background: #080c12;
+      border: 1px solid var(--border); border-radius: 8px;
+      padding: 14px 16px; position: relative;
+    }
+    .cmd-label { font-size: 10px; color: var(--dim); font-family: 'Inter', sans-serif; letter-spacing: 0.5px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
+    .cmd pre { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #4ade80; white-space: pre-wrap; word-break: break-all; }
+    .copy-btn {
+      font-size: 11px; padding: 2px 8px; border-radius: 4px;
+      background: rgba(124,58,237,0.15); color: #a78bfa;
+      border: 1px solid rgba(124,58,237,0.3); cursor: pointer;
+      font-family: 'Inter', sans-serif; transition: all 0.2s;
+    }
+    .copy-btn:hover { background: rgba(124,58,237,0.3); }
+
+    /* ─── Env file box ────────────────────────────────────────────── */
+    .env-box {
+      margin-top: 12px; background: #080c12;
+      border: 1px solid rgba(124,58,237,0.3); border-radius: 8px;
+      padding: 14px 16px;
+      font-family: 'JetBrains Mono', monospace; font-size: 13px;
+      line-height: 2;
+    }
+    .env-comment { color: var(--dim); }
+    .env-key     { color: #60a5fa; }
+    .env-eq      { color: var(--muted); }
+    .env-val     { color: #4ade80; }
+    .env-val-fill{ color: #fbbf24; }   /* things user must fill */
+
+    /* ─── Alert / callout ─────────────────────────────────────────── */
+    .callout {
+      display: flex; gap: 12px; margin-top: 12px;
+      padding: 12px 16px; border-radius: 8px; font-size: 13px; line-height: 1.55;
+    }
+    .callout.tip  { background: rgba(59,130,246,0.07);  border: 1px solid rgba(59,130,246,0.25);  color: #93c5fd; }
+    .callout.warn { background: rgba(245,158,11,0.07);  border: 1px solid rgba(245,158,11,0.25);  color: #fcd34d; }
+    .callout.ok   { background: rgba(34,197,94,0.07);   border: 1px solid rgba(34,197,94,0.25);   color: #86efac; }
+    .callout.note { background: rgba(107,114,128,0.07); border: 1px solid rgba(107,114,128,0.25); color: var(--muted); }
+    .callout-icon { font-size: 16px; flex-shrink: 0; }
+
+    /* ─── Divider ─────────────────────────────────────────────────── */
+    .divider { height: 1px; background: var(--border); margin: 48px 0; }
+
+    /* ─── Final CTA ───────────────────────────────────────────────── */
+    .cta-box {
+      background: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(59,130,246,0.1));
+      border: 1px solid rgba(124,58,237,0.4); border-radius: 16px;
+      padding: 40px; text-align: center;
+    }
+    .cta-box h2 { font-size: 26px; font-weight: 800; margin-bottom: 10px; }
+    .cta-box p  { color: var(--muted); font-size: 15px; margin-bottom: 28px; }
+    .btn-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .btn { padding: 12px 24px; border-radius: 10px; font-size: 14px; font-weight: 600; font-family: inherit; cursor: pointer; border: none; text-decoration: none; display: inline-block; transition: all 0.2s; }
+    .btn-primary { background: linear-gradient(135deg, var(--purple), var(--blue)); color: white; box-shadow: 0 4px 20px rgba(124,58,237,0.4); }
+    .btn-ghost   { background: transparent; border: 1px solid var(--border); color: var(--text); }
+    .btn:hover   { transform: translateY(-2px); filter: brightness(1.1); }
+
+    /* ─── Top header ──────────────────────────────────────────────── */
+    .page-header { margin-bottom: 48px; }
+    .page-header h1 { font-size: 36px; font-weight: 800; letter-spacing: -1px; margin-bottom: 8px; }
+    .page-header p  { color: var(--muted); font-size: 16px; }
+    .gradient { background: linear-gradient(135deg, #a78bfa, #60a5fa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+    /* ─── Progress pills ──────────────────────────────────────────── */
+    .pill-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 40px; }
+    .pill { padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; background: var(--surface); border: 1px solid var(--border); color: var(--muted); }
+
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; padding: 24px 20px 80px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ─── Sidebar ────────────────────────────────────────────────────── -->
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <div class="logo">
+      <div class="logo-icon">⚡</div>
+      <span>Scrollhouse</span>
+    </div>
+    <small>Real Mode Setup Guide</small>
+  </div>
+
+  <div class="nav-section">API Setup</div>
+  <a href="#step-email"   class="nav-item active" id="nav-email">  <span class="nav-dot">1</span> Email (Gmail)</a>
+  <a href="#step-drive"   class="nav-item"         id="nav-drive">  <span class="nav-dot">2</span> Google Drive</a>
+  <a href="#step-notion"  class="nav-item"         id="nav-notion"> <span class="nav-dot">3</span> Notion</a>
+  <a href="#step-airtable"class="nav-item"         id="nav-airtable"><span class="nav-dot">4</span> Airtable</a>
+
+  <div class="nav-section">Run it</div>
+  <a href="#step-test"    class="nav-item"         id="nav-test">   <span class="nav-dot">5</span> Test Credentials</a>
+  <a href="#step-start"   class="nav-item"         id="nav-start">  <span class="nav-dot">6</span> Start the Agent</a>
+
+  <div style="margin-top:auto;padding:16px 20px;border-top:1px solid var(--border);">
+    <a href="http://localhost:7890" target="_blank" style="display:block;text-align:center;padding:8px;background:linear-gradient(135deg,#7c3aed,#3b82f6);border-radius:8px;color:white;font-size:13px;font-weight:600;text-decoration:none;">Open Dashboard →</a>
+  </div>
+</nav>
+
+<!-- ─── Main ──────────────────────────────────────────────────────── -->
+<main class="main">
+
+  <div class="page-header">
+    <h1>Setup Guide — <span class="gradient">Real Mode</span></h1>
+    <p>Follow these 6 steps in order. Each step takes 2–10 minutes. No coding needed!</p>
+  </div>
+
+  <div class="pill-row">
+    <span class="pill">📧 Email — 5 min</span>
+    <span class="pill">📁 Google Drive — 10 min</span>
+    <span class="pill">📝 Notion — 5 min</span>
+    <span class="pill">📊 Airtable — 5 min</span>
+    <span class="pill">🧪 Test — 1 min</span>
+    <span class="pill">🚀 Run — 1 min</span>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <!-- STEP 1 — EMAIL                                                 -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <section class="section" id="step-email">
+    <div class="section-badge badge-email">📧 Step 1 of 6 — Email</div>
+    <div class="section-title">Set up Gmail to send emails</div>
+    <p class="section-desc">We use Gmail's App Password — it's like a special password just for this app. Your real Gmail password stays private and safe.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-left"><div class="step-circle c-orange">1</div><div class="step-line"></div></div>
+        <div class="step-body">
+          <div class="step-heading">Enable 2-Step Verification on Gmail</div>
+          <div class="step-text">
+            Open this link: <a href="https://myaccount.google.com/security" target="_blank">myaccount.google.com/security</a><br/>
+            Scroll down to <strong>"How you sign in to Google"</strong> → click <strong>"2-Step Verification"</strong> → turn it ON.<br/>
+            <span style="color:var(--dim);font-size:12px;">(If it's already ON, skip this step ✓)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-left"><div class="step-circle c-orange">2</div><div class="step-line"></div></div>
+        <div class="step-body">
+          <div class="step-heading">Create an App Password</div>
+          <div class="step-text">
+            Open this link: <a href="https://myaccount.google.com/apppasswords" target="_blank">myaccount.google.com/apppasswords</a><br/>
+            In the box, type <strong>Scrollhouse</strong> → click <strong>Create</strong>.<br/>
+            Google shows you a <strong>16-character password</strong> like: <code style="background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:4px;font-family:monospace;">abcd efgh ijkl mnop</code><br/>
+            <strong>Copy it — you'll only see it once!</strong>
+          </div>
+          <div class="callout tip">
+            <span class="callout-icon">💡</span>
+            <span>This is NOT your real Gmail password. It's a special one-time password just for this app. Very safe to use.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-left"><div class="step-circle c-orange">3</div></div>
+        <div class="step-body">
+          <div class="step-heading">Paste into your .env file</div>
+          <div class="step-text">Open <strong>e:\Agent\.env</strong> in Notepad or VS Code and fill in these 4 lines:</div>
+          <div class="env-box">
+            <span class="env-comment"># Change this to true for Gmail</span><br/>
+            <span class="env-key">USE_GMAIL</span><span class="env-eq">=</span><span class="env-val">true</span><br/><br/>
+            <span class="env-comment"># Your Gmail address</span><br/>
+            <span class="env-key">GMAIL_ADDRESS</span><span class="env-eq">=</span><span class="env-val-fill">your.email@gmail.com</span><br/><br/>
+            <span class="env-comment"># The 16-char App Password you just copied (spaces don't matter)</span><br/>
+            <span class="env-key">GMAIL_APP_PASSWORD</span><span class="env-eq">=</span><span class="env-val-fill">abcd efgh ijkl mnop</span><br/><br/>
+            <span class="env-comment"># Where the manager summary email goes (can be same as above)</span><br/>
+            <span class="env-key">MANAGER_EMAIL</span><span class="env-eq">=</span><span class="env-val-fill">your.email@gmail.com</span><br/><br/>
+            <span class="env-comment"># Also set FROM_EMAIL to your Gmail</span><br/>
+            <span class="env-key">FROM_EMAIL</span><span class="env-eq">=</span><span class="env-val-fill">your.email@gmail.com</span>
+          </div>
+          <div class="callout ok"><span class="callout-icon">✅</span><span>Email step done! Move to Step 2.</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <!-- STEP 2 — GOOGLE DRIVE                                          -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <section class="section" id="step-drive">
+    <div class="section-badge badge-drive">📁 Step 2 of 6 — Google Drive</div>
+    <div class="section-title">Create a Google Drive Service Account</div>
+    <p class="section-desc">A "service account" is like a robot Google account. We give it permission to create folders in your Drive automatically.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-left"><div class="step-circle c-blue">1</div><div class="step-line"></div></div>
+        <div class="step-body">
+          <div class="step-heading">Go to Google Cloud Console</div>
+          <div class="step-text">
+            Open: <a href="https://console.cloud.google.com" target="_blank">console.cloud.google.com</a><br/>
+            Sign in with any Google account → Click <strong>"New Project"</strong><br/>
+            Give it a name like <strong>Scrollhouse</strong> → Click <strong>Create</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-left"><div class="step-circle c-blue">2</div><div class="step-line"></div></div>
+        <div class="step-body">
+          <div class="step-heading">Enable the Google Drive API</div>
+          <div class="step-text">
+            In the top search bar, search for <strong>"Google Drive API"</strong><br/>
+            Click on it → Click the blue <strong>"Enable"</strong> button<br/>
+            Wait a few seconds for it to activate.
+          </div>
+          <div class="callout note"><span class="callout-icon">📝</span><span>You might need to go back to your project after enabling. Just click "← Back" or select your project from the top dropdown.</span></div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-left"><div class="step-circle c-blue">3</div><div class="step-line"></div></div>
+        <div class="step-body">
+          <div class="step-heading">Create a Service Account</div>
+          <div class="step-text">
+            In the left sidebar → click <strong>IAM &amp; Admin</strong> → <strong>Service Accounts</strong><br/>
+            Click <strong>+ Create Service Account</strong> at the top<br/>
+            → Name it <strong>scrollhouse-agent</strong> → Click <strong>Done</strong><br/>
+            (You can skip the optional steps 2 and 3 in the form)
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-left"><div class="step-circle c-blue">4</div><div class="step-line"></div></div>
+        <div class="step-body">
+          <div class="step-heading">Download the JSON key file</div>
+          <div class="step-text">
+            Click on the service account you just created<br/>
+            → Click the <strong>Keys</strong> tab → <strong>Add Key</strong> → <strong>Create new key</strong><br/>
+            → Choose <strong>JSON</strong> → Click <strong>Create</strong><br/>
+            A file will download automatically (something like <code style="font-family:monospace;font-size:12px;">scrollhouse-xxxx.json</code>)<br/>
+            <strong>Rename that file to <code style="font-family:monospace;">credentials.json</code> and move it to <code style="font-family:monospace;">e:\Agent\credentials.json</code></strong>
+          </div>
+          <div class="callout warn"><span class="callout-icon">⚠️</span><span>Keep this file private! Don't share it or commit it to GitHub. It's like a password for the robot account.</span></div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-left"><div class="step-circle c-blue">5</div><div class="step-line"></div></div>
+        <div class="step-body">
+          <div class="step-heading">Copy the service account email address</div>
+          <div class="step-text">
+            On the service account page, you'll see an email that looks like:<br/>
+            <code style="font-family:monospace;font-size:12px;background:rgba(255,255,255,0.08);padding:2px 8px;border-radius:4px;">scrollhouse-agent@scrollhouse-xxxxx.iam.gserviceaccount.com</code><br/>
+            <strong>Copy this email — you'll need it in the next step.</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-left"><div class="step-circle c-blue">6</div><div class="step-line"></div></div>
+        <div class="step-body">
+          <div class="step-heading">Create a Google Drive folder and share it</div>
+          <div class="step-text">
+            Open <a href="https://drive.google.com" target="_blank">drive.google.com</a> → Click <strong>+ New → Folder</strong><br/>
+            Name it <strong>"Scrollhouse Clients"</strong><br/>
+            Right-click the folder → <strong>Share</strong><br/>
+            Paste that service account email → change role to <strong>Editor</strong> → Click <strong>Send</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-left"><div class="step-circle c-blue">7</div></div>
+        <div class="step-body">
+          <div class="step-heading">Copy the Folder ID into .env</div>
+          <div class="step-text">
+            Open the folder in Drive → look at the URL in your browser:<br/>
+            <code style="font-family:monospace;font-size:12px;background:rgba(255,255,255,0.08);padding:4px 8px;border-radius:4px;display:inline-block;margin:8px 0;">https://drive.google.com/drive/folders/<strong style="color:#fbbf24;">THIS_IS_YOUR_FOLDER_ID</strong></code><br/>
+            Copy the highlighted part → paste in <code style="font-family:monospace;">e:\Agent\.env</code>:
+          </div>
+          <div class="env-box">
+            <span class="env-key">DRIVE_PARENT_FOLDER_ID</span><span class="env-eq">=</span><span class="env-val-fill">paste_the_id_from_the_url_here</span>
+          </div>
+          <div class="callout ok"><span class="callout-icon">✅</span><span>Google Drive step done! Move to Step 3.</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <!-- STEP 3 — NOTION                                                -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <section class="section" id="step-notion">
+    <div class="section-badge badge-notion">📝 Step 3 of 6 — Notion</div>
+    <div class="section-title">Connect Notion to auto-create pages</div>
+    <p class="section-desc">We create a Notion "Integration" — basically a bot user that can write pages inside your workspace.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-left"><div class="step-circle c-purple">1</div><div class="step-line"></div></div>
+        <div class="step-body">
+          <div class="step-heading">Create a Notion Integration</div>
+          <div class="step-text">
+            Go to: <a href="https://notion.so/my-integrations" target="_blank">notion.so/my-integrations</a><br/>
+            Click <strong>"+ New integration"</strong><br/>
+            → Name: <strong>Scrollhouse Agent</strong><br/>
+            → Select your Workspace from the dropdown<br/>
+            → Click <strong>Submit</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-left"><div class="step-circle c-purple">2</div><div class="step-line"></div></div>
+        <div class="step-body">
+          <div class="step-heading">Copy the Integration Token</div>
+          <div class="step-text">
+            After creating, you'll see a page with <strong>"Internal Integration Secret"</strong><br/>
+            It starts with <code style="font-family:monospace;font-size:12px;">secret_</code> — click <strong>Show</strong> then <strong>Copy</strong><br/>
+            Paste it in your <code style="font-family:monospace;">e:\Agent\.env</code> file:
+          </div>
+          <div class="env-box">
+            <span class="env-key">NOTION_API_KEY</span><span class="env-eq">=</span><span class="env-val-fill">secret_paste_your_token_here</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-left"><div class="step-circle c-purple">3</div><div class="step-line"></div></div>
+        <div class="step-body">
+          <div class="step-heading">Create a "Clients" page in Notion</div>
+          <div class="step-text">
+            In Notion, create a new page and name it <strong>"Clients"</strong><br/>
+            This is where all client pages will be created automatically.<br/>
+            You can put this page anywhere in your workspace.
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-left"><div class="step-circle c-purple">4</div><div class="step-line"></div></div>
+        <div class="step-body">
+          <div class="step-heading">Connect your Integration to that page</div>
+          <div class="step-text">
+            Open the <strong>Clients</strong> page → click the <strong>···</strong> (three dots) at the top right<br/>
+            → Click <strong>Connections</strong> → <strong>Connect to</strong><br/>
+            → Search for <strong>Scrollhouse Agent</strong> → click it<br/>
+            → Confirm by clicking <strong>Confirm</strong>
+          </div>
+          <div class="callout note"><span class="callout-icon">📝</span><span>If you don't do this step, the bot won't have permission to create pages and you'll get a "Not authorized" error.</span></div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-left"><div class="step-circle c-purple">5</div></div>
+        <div class="step-body">
+          <div class="step-heading">Copy the Page ID into .env</div>
+          <div class="step-text">
+            The page ID is in the URL when you open the page. It looks like:<br/>
+            <code style="font-family:monospace;font-size:12px;background:rgba(255,255,255,0.08);padding:4px 8px;border-radius:4px;display:inline-block;margin:8px 0;">https://notion.so/Clients-<strong style="color:#fbbf24;">abc123def456abc123def456abc12345</strong></code><br/>
+            Copy the <strong>last part after the final dash</strong> (32 characters, mix of letters and numbers)<br/>
+            Paste it into <code style="font-family:monospace;">e:\Agent\.env</code>:
+          </div>
+          <div class="env-box">
+            <span class="env-key">NOTION_PARENT_PAGE_ID</span><span class="env-eq">=</span><span class="env-val-fill">abc123def456abc123def456abc12345</span>
+          </div>
+          <div class="callout ok"><span class="callout-icon">✅</span><span>Notion step done! Move to Step 4.</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <!-- STEP 4 — AIRTABLE                                              -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <section class="section" id="step-airtable">
+    <div class="section-badge badge-airtable">📊 Step 4 of 6 — Airtable</div>
+    <div class="section-title">Set up Airtable as your CRM</div>
+    <p class="section-desc">Airtable is like a smart spreadsheet. We'll create a "Clients" table where every new client gets logged automatically.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-left"><div class="step-circle c-teal">1</div><div class="step-line"></div></div>
+        <div class="step-body">
+          <div class="step-heading">Create a free Airtable account</div>
+          <div class="step-text">
+            If you don't have one, sign up free at <a href="https://airtable.com" target="_blank">airtable.com</a><br/>
+            Then create a <strong>new Base</strong> (click "Add a base" → "Start from scratch")<br/>
+            Name it <strong>"Scrollhouse CRM"</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-left"><div class="step-circle c-teal">2</div><div class="step-line"></div></div>
+        <div class="step-body">
+          <div class="step-heading">Create the "Clients" table with the right columns</div>
+          <div class="step-text">
+            Rename the default table to <strong>Clients</strong><br/>
+            Then add these columns (click the <strong>+</strong> at the end of the column row to add):
+          </div>
+          <div class="screenshot">
+            <span class="path">Clients table columns — add in this order:</span>
+            <table style="width:100%;border-collapse:collapse;font-size:12px;">
+              <tr style="color:var(--muted);border-bottom:1px solid var(--border);">
+                <td style="padding:4px 8px;">Column Name</td>
+                <td style="padding:4px 8px;">Field Type</td>
+              </tr>
+              <tr><td style="padding:4px 8px;color:#60a5fa;">Client Name</td><td style="padding:4px 8px;color:var(--text);">Single line text <span style="color:var(--dim)">(already exists as "Name")</span></td></tr>
+              <tr style="background:rgba(255,255,255,0.02);"><td style="padding:4px 8px;color:#60a5fa;">Email</td><td style="padding:4px 8px;color:var(--text);">Email</td></tr>
+              <tr><td style="padding:4px 8px;color:#60a5fa;">Service Plan</td><td style="padding:4px 8px;color:var(--text);">Single select → add: Starter, Growth, Enterprise</td></tr>
+              <tr style="background:rgba(255,255,255,0.02);"><td style="padding:4px 8px;color:#60a5fa;">Start Date</td><td style="padding:4px 8px;color:var(--text);">Date</td></tr>
+              <tr><td style="padding:4px 8px;color:#60a5fa;">Account Manager</td><td style="padding:4px 8px;color:var(--text);">Single line text</td></tr>
+              <tr style="background:rgba(255,255,255,0.02);"><td style="padding:4px 8px;color:#60a5fa;">Status</td><td style="padding:4px 8px;color:var(--text);">Single select → add: Onboarding, Active, Churned</td></tr>
+              <tr><td style="padding:4px 8px;color:#60a5fa;">Drive Folder</td><td style="padding:4px 8px;color:var(--text);">URL</td></tr>
+              <tr style="background:rgba(255,255,255,0.02);"><td style="padding:4px 8px;color:#60a5fa;">Notion Page</td><td style="padding:4px 8px;color:var(--text);">URL</td></tr>
+              <tr><td style="padding:4px 8px;color:#60a5fa;">Notes</td><td style="padding:4px 8px;color:var(--text);">Long text</td></tr>
+              <tr style="background:rgba(255,255,255,0.02);"><td style="padding:4px 8px;color:#60a5fa;">Onboarded At</td><td style="padding:4px 8px;color:var(--text);">Date (turn on "Include time")</td></tr>
+              <tr><td style="padding:4px 8px;color:#60a5fa;">Source</td><td style="padding:4px 8px;color:var(--text);">Single line text</td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-left"><div class="step-circle c-teal">3</div><div class="step-line"></div></div>
+        <div class="step-body">
+          <div class="step-heading">Get a Personal Access Token</div>
+          <div class="step-text">
+            Go to: <a href="https://airtable.com/create/tokens" target="_blank">airtable.com/create/tokens</a><br/>
+            Click <strong>"Create new token"</strong><br/>
+            → Name: <strong>Scrollhouse</strong><br/>
+            → Add Scopes: click <strong>"Add a scope"</strong> and add these 3 one by one:
+            <ul style="margin:8px 0 0 16px;">
+              <li><code style="font-family:monospace;font-size:12px;">data.records:read</code></li>
+              <li><code style="font-family:monospace;font-size:12px;">data.records:write</code></li>
+              <li><code style="font-family:monospace;font-size:12px;">schema.bases:read</code></li>
+            </ul>
+            → Add Access: click <strong>"Add a base"</strong> → select <strong>Scrollhouse CRM</strong><br/>
+            → Click <strong>Create token</strong> → Copy the token (starts with <code style="font-family:monospace;font-size:12px;">pat</code>)
+          </div>
+          <div class="env-box">
+            <span class="env-key">AIRTABLE_API_KEY</span><span class="env-eq">=</span><span class="env-val-fill">patXXXXXXXXXXXXXX</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-left"><div class="step-circle c-teal">4</div></div>
+        <div class="step-body">
+          <div class="step-heading">Copy the Base ID from the URL</div>
+          <div class="step-text">
+            Open your Airtable base → look at the URL:<br/>
+            <code style="font-family:monospace;font-size:12px;background:rgba(255,255,255,0.08);padding:4px 8px;border-radius:4px;display:inline-block;margin:8px 0;">https://airtable.com/<strong style="color:#fbbf24;">appXXXXXXXXXXXXXX</strong>/tblXXX...</code><br/>
+            Copy the <strong style="color:#fbbf24;">appXXXXXXXXXXXXXX</strong> part → paste into <code style="font-family:monospace;">.env</code>:
+          </div>
+          <div class="env-box">
+            <span class="env-key">AIRTABLE_BASE_ID</span><span class="env-eq">=</span><span class="env-val-fill">appXXXXXXXXXXXXXX</span><br/>
+            <span class="env-key">AIRTABLE_TABLE_NAME</span><span class="env-eq">=</span><span class="env-val">Clients</span>
+          </div>
+          <div class="callout ok"><span class="callout-icon">✅</span><span>Airtable step done! Now test everything.</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <!-- STEP 5 — TEST                                                  -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <section class="section" id="step-test">
+    <div class="section-badge badge-test">🧪 Step 5 of 6 — Test</div>
+    <div class="section-title">Check all your API keys work</div>
+    <p class="section-desc">Run this one command — it checks all 4 connections automatically and tells you exactly what's working and what isn't.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-left"><div class="step-circle c-green">1</div><div class="step-line"></div></div>
+        <div class="step-body">
+          <div class="step-heading">Open a new PowerShell / Terminal window</div>
+          <div class="step-text">
+            Press <strong>Win + R</strong> → type <strong>powershell</strong> → press Enter<br/>
+            (Or press <strong>Win + X</strong> → click <strong>Terminal</strong>)
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-left"><div class="step-circle c-green">2</div><div class="step-line"></div></div>
+        <div class="step-body">
+          <div class="step-heading">Run the credential test</div>
+          <div class="cmd">
+            <div class="cmd-label"><span>POWERSHELL</span><button class="copy-btn" onclick="navigator.clipboard.writeText('cd e:\\Agent\npython agent/test_credentials.py')">Copy</button></div>
+            <pre>cd e:\Agent
+python agent/test_credentials.py</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-left"><div class="step-circle c-green">3</div></div>
+        <div class="step-body">
+          <div class="step-heading">Read the results</div>
+          <div class="step-text">
+            You'll see one of these for each service:<br/><br/>
+            <strong style="color:var(--green);">✅ Google Drive connected</strong> → that service is working<br/>
+            <strong style="color:var(--red);">❌ NOTION_API_KEY not set</strong> → go back and fill in that key<br/><br/>
+            Fix any ❌ ones by re-checking the step above, then run the test again.<br/>
+            When all 4 show ✅, you're ready!
+          </div>
+          <div class="callout tip"><span class="callout-icon">💡</span><span>The most common mistake is forgetting to <strong>share</strong> the Notion page or Drive folder with the integration/service account. Double check those sharing steps!</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <!-- STEP 6 — START                                                 -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <section class="section" id="step-start">
+    <div class="section-badge badge-start">🚀 Step 6 of 6 — Start</div>
+    <div class="section-title">Start the agent and test it for real!</div>
+    <p class="section-desc">Two commands in two terminal windows, then use the dashboard to fire a real onboarding.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-left"><div class="step-circle c-gold">1</div><div class="step-line"></div></div>
+        <div class="step-body">
+          <div class="step-heading">Terminal 1 — Start the backend agent</div>
+          <div class="step-text">Keep this running. It's the engine that calls all the real APIs.</div>
+          <div class="cmd">
+            <div class="cmd-label"><span>TERMINAL 1 — keep open</span><button class="copy-btn" onclick="navigator.clipboard.writeText('cd e:\\Agent\nuvicorn agent.main:app --reload --port 8000')">Copy</button></div>
+            <pre>cd e:\Agent
+uvicorn agent.main:app --reload --port 8000</pre>
+          </div>
+          <div class="step-text" style="margin-top:8px;">You should see: <code style="font-family:monospace;background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:4px;">Uvicorn running on http://127.0.0.1:8000</code></div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-left"><div class="step-circle c-gold">2</div><div class="step-line"></div></div>
+        <div class="step-body">
+          <div class="step-heading">Open the Dashboard</div>
+          <div class="step-text">
+            The dashboard server is already running at:<br/>
+            <a href="http://localhost:7890" target="_blank" style="font-size:15px;font-weight:600;">→ http://localhost:7890</a>
+          </div>
+          <div class="callout note"><span class="callout-icon">📝</span><span>If it's not running, open Terminal 2 and run: <code style="font-family:monospace;">python -m http.server 7890 --directory e:\Agent\dashboard</code></span></div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-left"><div class="step-circle c-gold">3</div></div>
+        <div class="step-body">
+          <div class="step-heading">Fill the form and fire a REAL onboarding!</div>
+          <div class="step-text">
+            In the dashboard: fill in the <strong>New Client Intake</strong> form with real details<br/>
+            → Use <strong>your own email</strong> as the client email as a test<br/>
+            → Click <strong>"Trigger Onboarding Agent"</strong><br/><br/>
+            Within 10–15 seconds you will see:<br/>
+            📧 A real welcome email arrive in your inbox<br/>
+            📁 A real folder appear in your Google Drive<br/>
+            📝 A real page created in your Notion workspace<br/>
+            📊 A real row added to your Airtable Clients table<br/>
+            ✉️  A completion summary email arrive at your MANAGER_EMAIL
+          </div>
+          <div class="callout ok">
+            <span class="callout-icon">🎉</span>
+            <span><strong>That's it! Your onboarding agent is fully live.</strong> Every new client form submission now triggers the entire onboarding flow automatically — no manual work needed.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Final CTA ─────────────────────────────────────────────── -->
+  <div class="cta-box">
+    <h2>🎯 You're fully set up!</h2>
+    <p>The entire Scrollhouse client onboarding process now runs automatically.<br/>45 minutes of manual work → 15 seconds of automation.</p>
+    <div class="btn-row">
+      <a class="btn btn-primary" href="http://localhost:7890" target="_blank">Open Dashboard →</a>
+      <a class="btn btn-ghost"   href="http://localhost:8000/docs" target="_blank">View API Docs</a>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  // Highlight active nav item on scroll
+  const sections = document.querySelectorAll('.section');
+  const navItems = {
+    'step-email':    document.getElementById('nav-email'),
+    'step-drive':    document.getElementById('nav-drive'),
+    'step-notion':   document.getElementById('nav-notion'),
+    'step-airtable': document.getElementById('nav-airtable'),
+    'step-test':     document.getElementById('nav-test'),
+    'step-start':    document.getElementById('nav-start'),
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        Object.values(navItems).forEach(n => n?.classList.remove('active'));
+        navItems[entry.target.id]?.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
