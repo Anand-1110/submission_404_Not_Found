@@ -162,7 +162,10 @@ async def _send(to_email: str, subject: str, html_body: str) -> dict:
             msg["From"]    = GMAIL_ADDRESS
             msg["To"]      = to_email
             msg.attach(MIMEText(html_body, "html"))
-            with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+            
+            # Using Port 587 (STARTTLS) for better cloud compatibility
+            with smtplib.SMTP("smtp.gmail.com", 587) as server:
+                server.starttls() 
                 server.login(GMAIL_ADDRESS, GMAIL_APP_PASS)
                 server.sendmail(GMAIL_ADDRESS, to_email, msg.as_string())
             return {"success": True, "provider": "gmail", "to": to_email, "sent_at": datetime.utcnow().isoformat()}
