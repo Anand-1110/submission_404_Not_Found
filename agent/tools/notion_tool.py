@@ -166,4 +166,10 @@ async def create_notion_page(payload: dict) -> dict:
             "created_at": datetime.utcnow().isoformat(),
         }
     except Exception as e:
-        return {"success": False, "error": str(e)}
+        err_msg = str(e)
+        print(f"[ERROR] Notion failed for parent '{NOTION_PARENT_PAGE_ID}': {err_msg}")
+        return {
+            "success": False, 
+            "error": err_msg,
+            "manual_override_required": f"Please ensure your Notion Integration is added to the parent page '{NOTION_PARENT_PAGE_ID}'."
+        }
