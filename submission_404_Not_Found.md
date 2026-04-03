@@ -4,9 +4,10 @@
 
 **Team Name:** 404_Not_Found  
 **Members:**  
-Anand | Lead Developer / AI Architect  
-(Fill in other members here) | (Role)  
-**Contact Email:** (Your Email Here)  
+Anand UI/UX Designer
+Ashish Lead Developer
+Adarsh Prompt Engineer  
+**Contact Email:** (chaurasia.avinash4002@gmail.com)  
 
 ---
 
@@ -100,9 +101,10 @@ List the edge cases from your problem statement that your system handles, and br
 
 ## Repository
 
-**GitHub Repository Link:** (Paste your GitHub Link here before submitting)  
+**GitHub Repository Link:** (https://github.com/Anand-1110/submission_404_Not_Found)  
 **Branch submitted:** main  
-**Commit timestamp of final submission:** (Paste your commit hash here e.g. 8f4b3c2 - 2026-04-03 14:00:00 UTC)  
+**Commit timestamp of final submission:** (2026-04-03 5926c32 6 minutes ago
+)  
 
 ---
 
