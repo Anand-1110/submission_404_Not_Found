@@ -201,6 +201,7 @@ async def send_welcome_email(payload: dict) -> dict:
         try:
             llm = ChatOpenAI(
                 api_key=grok_key,
+                openai_api_key=grok_key, # for compatibility
                 base_url="https://api.groq.com/openai/v1",
                 model="llama-3.3-70b-versatile", 
                 temperature=2

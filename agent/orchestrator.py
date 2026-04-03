@@ -73,9 +73,14 @@ async def run_orchestrator(payload: dict, run_id: str, logger) -> dict:
     tool_map = {t.name: t for t in tools}
 
     # ── Connect Brain ────────────────────────────────────────────────────────
-    grok_key = os.getenv("GROK_API_KEY", "")
+    grok_key = os.getenv("GROK_API_KEY", "").strip()
+    if not grok_key:
+        logger.error(run_id, "❌ GROK_API_KEY is missing from environment variables!")
+        raise ValueError("GROK_API_KEY is required for the Agentic Orchestrator.")
+
     llm = ChatOpenAI(
         api_key=grok_key, 
+        openai_api_key=grok_key, # double-binding for compatibility
         base_url="https://api.groq.com/openai/v1", 
         model="llama-3.3-70b-versatile", 
         temperature=0.1
