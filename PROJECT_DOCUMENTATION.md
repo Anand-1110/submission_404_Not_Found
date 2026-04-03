@@ -36,12 +36,12 @@ This project is a **Fully Autonomous AI Agent** designed to automate the complet
 3. **Duplicate Checking**: Before any folders or emails are sent, the system enters the `node_check_duplicate` state. It secretly queries the live **Airtable** database to see if the client's exact email address already exists.
 4. **Pass/Fail**: If a duplicate is found, the onboarding halts immediately, throwing an error on the dashboard to prevent spamming the client. If clean, it proceeds.
 
-### Phase 3: The Orchestration Pipeline
-5. **AI Welcome Email**: The agent passes the client's custom "Notes" to the **Llama 3 AI**. The AI drafts a highly personalized introductory email acknowledging the client's specific business goals. The backend then injects this AI copy into an HTML template and sends it via **Gmail**.
-6. **Workspace Generation**: The backend reaches out to the **Google Drive API** to create a fresh folder specifically named for the client, generating a secure sharing link.
-7. **Task Management**: The system calls the **Notion API** to create a brand new client portal page cloned from a standard agency template.
-8. **CRM Logging**: Finally, the system logs the client's Name, Email, and links to both the Drive folder and Notion page squarely into **Airtable**.
-9. **Final Summary**: The system sends a concluding "Onboarding Summary" email to the Account Manager, alerting them that everything was successfully provisioned.
+### Phase 3: The Orchestration Pipeline (70% Agentic ReAct)
+5. **The Autonomous Loop**: The payload is passed to a LangChain ReAct loop powered natively by `Llama-3.3-70b-versatile` running via Groq. The agent is given explicit instructions to fully deploy the environment but is deliberately forced to figure out the operational API calls on its own! 
+6. **Dynamic Tool Execution**: The agent evaluates its available `@tools`. It actively chooses to run the `Google Drive API` first. It captures the returned Folder URL. 
+7. **Recursive Payload Passing**: The agent then reads the output of the Drive step and physically injects it as an argument into the `Notion API` tool to ensure the Notion database contains the new client's cloud storage linkage.
+8. **Finalizing Infrastructure**: The agent triggers the `Airtable API` tool to cement the entire CRM row.
+9. **Dispatching Email**: Finally, perceiving that the infrastructure tools succeeded, the LLM actively drafts highly personalized introduction copy using the client's signup notes, and automatically calls the `Email API` to fire the SendGrid email before self-terminating!
 
 ### Phase 4: Autonomous "Auto-Reply" (Background Listener)
 10. **IMAP Polling**: Running quietly alongside the FastAPI server is a continuous background loop (`imap_listener.py`). Every 15 seconds, it queries the main Gmail inbox looking for incoming emails flagged as **UNREAD**.

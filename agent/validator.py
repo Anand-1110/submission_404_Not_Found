@@ -137,7 +137,7 @@ async def node_check_am(state: ValidationState) -> ValidationState:
     """Check if the account manager name is in the valid list."""
     import os
     manager = state["payload"].get("account_manager", "").strip()
-    valid_ams = [m.strip().lower() for m in os.getenv("VALID_MANAGERS", "Alice,Bob,Charlie,David").split(",")]
+    valid_ams = [m.strip().lower() for m in os.getenv("VALID_MANAGERS", "Ashish,Adarsh,Anand").split(",")]
     
     if manager.lower() not in valid_ams:
         msg = f"Unknown account manager '{manager}'. Requires confirmation."

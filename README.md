@@ -10,14 +10,14 @@ When a new client is added, the agent automatically:
 
 | Step | Tool | Action |
 |------|------|--------|
-| 1 | **n8n** | Receives webhook trigger from your signup form |
-| 2 | **LangGraph** | Validates email, checks duplicates, verifies date |
-| 3 | **LangChain → Email** | Sends personalised welcome email via SendGrid |
-| 4 | **LangChain → Drive** | Creates `[Client] Name/` folder + 5 subfolders + shares |
-| 5 | **LangChain → Notion** | Creates client page from master template |
-| 6 | **LangChain → Airtable** | Creates CRM record with Drive + Notion links |
-| 7 | **Email** | Sends completion summary to account manager |
-| 8 | **LangSmith** | Saves full audit log to `logs/audit.jsonl` |
+| 1 | **FastAPI** | Validates and mounts the frontend dashboard natively! |
+| 2 | **LangGraph** | Validates email format, checks for duplicates, and traps invalid dates |
+| 3 | **LangChain Agent** | The LLM receives the webhook data and launches an autonomous ReAct loop |
+| 4 | **Agent → Tool** | Dynamically calls the Google Drive API and interprets the URL output |
+| 5 | **Agent → Tool** | Feeds the Drive URL into the Notion Template generator API |
+| 6 | **Agent → Tool** | Feeds both URLs into the Airtable CRM creation API |
+| 7 | **Agent → Tool** | Only after full success, drafts and dispatches the Welcome Email |
+| 8 | **SysAdmin** | Sends a completion summary to the manager |
 
 ---
 
@@ -50,30 +50,19 @@ Agent/
 
 ## Quick Start
 
-### 1. Open the Dashboard (no setup needed)
-
-Just open `dashboard/index.html` in your browser. Click **▶ Run Demo** to watch the full pipeline animate live.
-
-### 2. Run the Python Agent (optional — for real integrations)
+### 1. Spin up the Unified Server
 
 ```powershell
 # Install dependencies
 pip install -r requirements.txt
 
-# Copy env template and fill in your API keys
-copy .env.example .env
-notepad .env
-
-# Start the webhook server
+# Start the unified backend (also hosts the frontend)
 uvicorn agent.main:app --reload --port 8000
 ```
 
-### 3. Import the n8n Workflow
+### 2. Open the Live App
 
-1. Install n8n: `npx -y n8n`
-2. Open `http://localhost:5678`
-3. Click **Import** → select `n8n/workflow.json`
-4. Activate the workflow
+Go to **[http://localhost:8000/dashboard](http://localhost:8000/dashboard)** in your browser to interact with the LLM.
 
 ---
 
@@ -116,7 +105,7 @@ Invoke-WebRequest -Uri http://localhost:8000/webhook/onboard `
 
 ## Hackathon Demo Script
 
-1. Open `dashboard/index.html`
+1. Open `http://localhost:8000/dashboard`
 2. Fill in a new client form → hit "Trigger Onboarding Agent"
 3. Watch all 8 pipeline steps light up in real time
 4. Show the result card with Drive / Notion / Airtable links

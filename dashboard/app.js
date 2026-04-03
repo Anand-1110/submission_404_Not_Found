@@ -394,7 +394,7 @@ form.addEventListener('submit', async (e) => {
     client_email:    document.getElementById('clientEmail').value,
     service_plan:    document.getElementById('clientPlan').value,
     start_date:      document.getElementById('startDate').value,
-    account_manager: document.getElementById('accountManager').value || 'Unassigned',
+    account_manager: document.getElementById('accountManager').value || 'Anand',
     notes:           document.getElementById('notes').value,
   };
 
@@ -417,7 +417,7 @@ document.getElementById('btnTriggerDemo').addEventListener('click', async () => 
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
   document.getElementById('startDate').value = tomorrow.toISOString().split('T')[0];
-  document.getElementById('accountManager').value = 'Sarah J.';
+  document.getElementById('accountManager').value = 'Anand';
   document.getElementById('notes').value = 'Hackathon demo client';
 
   await runPipeline({
@@ -425,7 +425,7 @@ document.getElementById('btnTriggerDemo').addEventListener('click', async () => 
     client_email: 'ceo@novadigital.io',
     service_plan: 'growth',
     start_date: tomorrow.toISOString().split('T')[0],
-    account_manager: 'Sarah J.',
+    account_manager: 'Anand',
     notes: 'Hackathon demo client',
   });
 });
