@@ -197,8 +197,8 @@ async def _send(to_email: str, subject: str, html_body: str) -> dict:
             msg["To"]      = to_email
             msg.attach(MIMEText(html_body, "html"))
             
-            # Using Port 587 (STARTTLS) for better cloud compatibility
-            with smtplib.SMTP("smtp.gmail.com", 587) as server:
+            # Using Port 587 (STARTTLS) with a 30s timeout for better cloud stability
+            with smtplib.SMTP("smtp.gmail.com", 587, timeout=30) as server:
                 server.starttls() 
                 server.login(GMAIL_ADDRESS, GMAIL_APP_PASS)
                 server.sendmail(GMAIL_ADDRESS, to_email, msg.as_string())
