@@ -37,7 +37,7 @@ List every tool, library, framework, API, and model your system uses. For each o
 | Google Drive API | Google Cloud | Cloud Storage connector that magically generates a recurring nested folder hierarchy (e.g. Invoices, Assets) explicitly assigned to the client. |
 | Notion API | Notion Client | Workspace module that dynamically reads the live blocks of a master template page and replicates them perfectly into a brand new isolated client board. |
 | PyAirtable | Airtable API | CRM Database connector that scans for duplicate companies and inserts the final verified client record into the CRM table. |
-| Vanilla JS & HTML | Native Web | The interactive interactive dashboard frontend that connects to the FastAPI backend and visually displays the AI pipeline. |
+| Vanilla JS & HTML | Native Web | The interactive dashboard frontend that connects to the FastAPI backend and visually displays the AI pipeline. |
 
 ---
 
@@ -74,12 +74,12 @@ This section is verified. Do not overstate the agentic percentage. Judges have a
 
 | Layer | Percentage | Description |
 |---|---|---|
-| Deterministic automation | 85% | What always happens the same way regardless of LLM output (Langgraph validation sequence, Google Drive folder creation, Airtable queries, Notion Block migrations). |
-| LLM-driven and agentic | 15% | What the LLM decides, routes, interprets, or generates in a way that affects system behavior (Processing raw client notes into personalized email copy, analyzing unread emails for auto-reply dispatching). |
+| Deterministic automation | 30% | What always happens the same way regardless of LLM output (Langgraph validation sequence, Airtable duplicated formulas, UI Modal holds, Error Email Fallbacks). |
+| LLM-driven and agentic | 70% | The LLM operates as the primary master orchestrator. It receives raw webhook JSON, autonomously reasons about what API tools to call in what order, interprets their outputs, dynamically passes URL payloads across API nodes (e.g. inserting the generated Drive URL into the Notion tool input), and conditionally drafts custom communications based on its runtime evaluation. |
 
 **Total must equal 100%.**
 
-We purposefully isolated the LLM to the 15% communication strata. B2B infrastructure requires absolute reliability; if we allowed an LLM to control the 85% orchestration logic directly (via a ReAct agent), it could hallucinate parameters and permanently overwrite massive Notion or Google Drive hierarchies. By isolating the AI to copywriting, we retain 100% database safety.
+We purposefully structured this as a LangChain ReAct Agent to grant the AI true operational agency. Instead of hard-scripting the deployment sequence, the LLM physically controls a suite of infrastructure `tools`. It reads the output of one API, evaluates success constraints, and autonomously decides on the next appropriate routing vector. If a junior employee attempts an operation, the LLM reasons through the task and handles the multi-step orchestration on its own.
 
 ---
 

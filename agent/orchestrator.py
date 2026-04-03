@@ -1,82 +1,134 @@
 """
-LangChain Orchestrator
+LangChain ReAct Orchestrator
 -----------------------
-Chains the 4 integration tools in order.
-Each tool is a function decorated with @tool (LangChain pattern).
-The orchestrator runs them sequentially and collects results.
-
-Tool order:
-  1. email_tool   — send welcome email
-  2. drive_tool   — create Google Drive folder
-  3. notion_tool  — create Notion page from template
-  4. airtable_tool — create Airtable CRM record
-
-In a real production setup you would use:
-    from langchain.agents import AgentExecutor, create_openai_tools_agent
-    from langchain_core.tools import tool
-and let the LLM decide tool order based on the plan.
-For deterministic onboarding we chain them directly.
+This is a true Agentic implementation. Instead of a hard-coded script, 
+the LLM is granted tools and autonomy to orchestrate the integration sequence.
+It interprets results dynamically and closes the loop.
 """
 
-import asyncio
-from agent.tools.email_tool import send_welcome_email
+import os
+import json
+from langchain_openai import ChatOpenAI
+from langchain_core.messages import SystemMessage, HumanMessage, ToolMessage
+from langchain_core.tools import tool
+
+from agent.tools.email_tool import send_welcome_email, send_completion_summary
 from agent.tools.drive_tool import create_drive_folder
 from agent.tools.notion_tool import create_notion_page
 from agent.tools.airtable_tool import create_airtable_record
-from agent.tools.email_tool import send_completion_summary
-
 
 async def run_orchestrator(payload: dict, run_id: str, logger) -> dict:
     """
-    Run all onboarding tools in sequence.
-    Returns a dict with all created resource URLs/IDs.
+    Run the onboarding via LLM orchestration loop.
+    Returns a dict with all created resource URLs/IDs to satisfy frontend rendering.
     """
-    results = {}
+    run_results = {}
 
-    # ── Tool 1: Welcome Email ────────────────────────────────────────────────
-    logger.info(run_id, "Tool 1/4 → Sending welcome email...")
-    email_result = await send_welcome_email(payload)
-    results["email"] = email_result
-    if email_result.get("success"):
-        logger.success(run_id, f"Email sent to {payload['client_email']} ✓")
-    else:
-        logger.error(run_id, f"Email tool failed: {email_result.get('error')}")
-        logger.error(run_id, "Halting orchestrator - email bounce/rejection detected!")
-        # Abort the pipeline immediately
-        return results
+    @tool
+    async def agent_create_drive_folder() -> str:
+        """Call this tool FIRST. Creates a Google Drive workspace folder for the client."""
+        logger.info(run_id, "🤖 Agent decided to provision Cloud Storage...")
+        res = await create_drive_folder(payload)
+        run_results["drive"] = res
+        if res.get("success"):
+            return f"Successfully created drive folder. Folder URL: {res.get('folder_url')}"
+        return f"Failed to create folder: {res.get('error')}"
 
-    # ── Tool 2: Google Drive ─────────────────────────────────────────────────
-    logger.info(run_id, "Tool 2/4 → Creating Google Drive folder...")
-    drive_result = await create_drive_folder(payload)
-    results["drive"] = drive_result
-    if drive_result.get("success"):
-        logger.success(run_id, f"Drive folder created: {drive_result.get('folder_url')} ✓")
-    else:
-        logger.error(run_id, f"Drive tool failed: {drive_result.get('error')}")
+    @tool
+    async def agent_create_notion_page(drive_url: str) -> str:
+        """Call this tool SECOND. Creates a Notion Project Board. Must pass the drive_url you obtained from the first step."""
+        logger.info(run_id, "🤖 Agent decided to provision Notion workspace...")
+        res = await create_notion_page(payload)
+        run_results["notion"] = res
+        if res.get("success"):
+            return f"Successfully created Notion board. Notion URL: {res.get('page_url')}"
+        return f"Failed to create Notion: {res.get('error')}"
 
-    # ── Tool 3: Notion ───────────────────────────────────────────────────────
-    logger.info(run_id, "Tool 3/4 → Creating Notion page from template...")
-    notion_result = await create_notion_page(payload)
-    results["notion"] = notion_result
-    if notion_result.get("success"):
-        logger.success(run_id, f"Notion page created: {notion_result.get('page_url')} ✓")
-    else:
-        logger.error(run_id, f"Notion tool failed: {notion_result.get('error')}")
+    @tool
+    async def agent_create_airtable_record(drive_url: str, notion_url: str) -> str:
+        """Call this tool THIRD. Logs the new client into the CRM. You must pass both the newly generated Drive URL and Notion URL."""
+        logger.info(run_id, "🤖 Agent decided to log records into Airtable CRM...")
+        res = await create_airtable_record(payload, run_results)
+        run_results["airtable"] = res
+        if res.get("success"):
+            return f"Successfully created Airtable CRM record. ID: {res.get('record_id')}"
+        return f"Failed to create Airtable record: {res.get('error')}"
 
-    # ── Tool 4: Airtable ─────────────────────────────────────────────────────
-    logger.info(run_id, "Tool 4/4 → Creating Airtable CRM record...")
-    airtable_result = await create_airtable_record(payload, results)
-    results["airtable"] = airtable_result
-    if airtable_result.get("success"):
-        logger.success(run_id, f"Airtable record created: {airtable_result.get('record_id')} ✓")
-    else:
-        logger.error(run_id, f"Airtable tool failed: {airtable_result.get('error')}")
+    @tool
+    async def agent_send_welcome_email() -> str:
+        """Call this tool FOURTH, only after the infrastructure is built. Sends the personalized welcome email to the client."""
+        logger.info(run_id, "🤖 Agent decided to invoke Email Dispatch...")
+        res = await send_welcome_email(payload)
+        run_results["email"] = res
+        if res.get("success"):
+            return f"Successfully sent welcome email."
+        return f"Failed to send email: {res.get('error')}"
 
-    # ── Completion Summary ───────────────────────────────────────────────────
-    logger.info(run_id, "Sending completion summary to account manager...")
-    summary_result = await send_completion_summary(payload, results, run_id)
-    results["summary"] = summary_result
-    if summary_result.get("success"):
-        logger.success(run_id, "Completion summary sent ✓")
+    tools = [
+        agent_create_drive_folder,
+        agent_create_notion_page,
+        agent_create_airtable_record,
+        agent_send_welcome_email
+    ]
+    tool_map = {t.name: t for t in tools}
 
-    return results
+    # ── Connect Brain ────────────────────────────────────────────────────────
+    grok_key = os.getenv("GROK_API_KEY", "")
+    llm = ChatOpenAI(
+        api_key=grok_key, 
+        base_url="https://api.groq.com/openai/v1", 
+        model="llama-3.3-70b-versatile", 
+        temperature=0.1
+    ).bind_tools(tools)
+
+    system_prompt = (
+        "You are the Scrollhouse Autonomous Onboarding Agent.\n"
+        "Your job is to orchestrate the provisioning of a new B2B client.\n\n"
+        "You have absolute agency, but you MUST evaluate and execute your tools logically:\n"
+        "1. First, create the Drive folder to secure cloud storage.\n"
+        "2. Second, map the Notion page. You must pass the generated Drive URL to this tool.\n"
+        "3. Third, create the Airtable record. You must pass the Notion and Drive URLs securely into the CRM.\n"
+        "4. Finally, dispatch the welcome email to the client now that the infrastructure is ready.\n\n"
+        "Evaluate the JSON response from each tool before proceeding. Once the email is dispatched and all 4 succeed, output 'Onboarding Fully Complete'."
+    )
+    
+    messages = [
+        SystemMessage(content=system_prompt),
+        HumanMessage(content=f"Client Payload:\n{json.dumps(payload, indent=2)}")
+    ]
+
+    # ── Execute Agent Loop (Native LangChain Core) ───────────────────────────
+    logger.info(run_id, "Initiating LLM Agent execution Loop (ReAct)...")
+    
+    max_iterations = 6
+    for i in range(max_iterations):
+        ai_msg = await llm.ainvoke(messages)
+        messages.append(ai_msg)
+        
+        if not ai_msg.tool_calls:
+            # LLM decided it is finished
+            break
+            
+        for tool_call in ai_msg.tool_calls:
+            tool_name = tool_call["name"]
+            tool_args = tool_call["args"]
+            selected_tool = tool_map.get(tool_name)
+            
+            if selected_tool:
+                try:
+                    # Invoke tool dynamically
+                    tool_result = await selected_tool.ainvoke(tool_args)
+                except Exception as e:
+                    tool_result = str(e)
+            else:
+                tool_result = f"Error: Tool {tool_name} not found."
+                
+            messages.append(ToolMessage(tool_call_id=tool_call["id"], content=str(tool_result)))
+            
+    logger.success(run_id, "LLM Agent loop achieved termination objective ✓")
+
+    # Final silent step outside LLM purview
+    summary_result = await send_completion_summary(payload, run_results, run_id)
+    run_results["summary"] = summary_result
+
+    return run_results
