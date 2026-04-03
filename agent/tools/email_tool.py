@@ -156,6 +156,9 @@ import httpx
 
 async def _send(to_email: str, subject: str, html_body: str) -> dict:
     """Route to SendGrid, Resend, or Gmail based on .env config."""
+    # Diagnostic log to help the user verify Render settings
+    active_provider = "RESEND" if USE_RESEND else ("GMAIL" if USE_GMAIL else "SENDGRID")
+    print(f"[DEBUG] Email Dispatcher using provider: {active_provider}")
 
     if USE_RESEND:
         # ── Resend API (HTTP) ─────────────────────────────────────────────────
